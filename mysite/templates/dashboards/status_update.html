@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Status Update Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .background-pattern {
+        background-color: #f8fafc;
+        background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px), radial-gradient(#e2e8f0 0.5px, #f8fafc 0.5px);
+        background-size: 20px 20px;
+        background-position: 0 0, 10px 10px;
+    }
+    
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 200px;
+    }
+
+    /* DataTables Tailwind CSS Integration */
+    .dataTables_wrapper .dataTables_length select {
+        @apply rounded-lg border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50;
+        padding-right: 2rem;
+    }
+
+    .dataTables_wrapper .dataTables_filter {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        @apply rounded-lg border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50;
+        padding-left: 2.5rem;
+        width: 100%;
+        min-width: 250px;
+    }
+
+    .dataTables_wrapper .dataTables_filter::before {
+        content: "\f002";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6B7280;
+        pointer-events: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        .dataTables_wrapper .dataTables_filter {
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        
+        .dataTables_wrapper .dataTables_filter input {
+            width: 100%;
+            min-width: 0;
+        }
+    }
+
+    /* Focus styles for better accessibility */
+    .dataTables_wrapper .dataTables_filter input:focus {
+        @apply border-blue-300 ring ring-blue-200 ring-opacity-50;
+        outline: none;
+    }
+
+    /* DataTable pagination styling */
+    .dataTables_wrapper .dataTables_paginate {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        @apply px-3 py-1 border border-gray-300 bg-white text-gray-700 mx-1 rounded;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        @apply bg-gray-50 text-gray-900;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        @apply bg-blue-50 text-blue-600 border-blue-300;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+        @apply opacity-50 cursor-not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="background-pattern min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Status Update Dashboard</h1>
+                    <p class="mt-1 text-sm text-gray-600">Real-time production status tracking</p>
+                </div>
+                <a href="{{ url_for('dashboards') }}" 
+                   class="text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-arrow-left mr-1"></i>
+                    Back to Summary
+                </a>
+            </div>
+        </div>
+
+        <!-- React Root -->
+        <div class="bg-white rounded-lg shadow-sm">
+            <div id="status-update-root">
+                <div class="loading">
+                    <div class="text-center p-8">
+                        <i class="fas fa-spinner fa-spin text-3xl text-blue-500 mb-4"></i>
+                        <p class="text-gray-600">Loading dashboard data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- React Dependencies -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+<!-- Status Update Component -->
+<script src="{{ url_for('static', filename='js/StatusUpdateDashboard.js') }}"></script>
+
+<!-- Initialize React Component -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Initializing Status Update Dashboard');
+        
+        try {
+            const container = document.getElementById('status-update-root');
+            if (!container) {
+                throw new Error('Root container not found');
+            }
+            
+            console.log('Mounting React component...');
+            const root = ReactDOM.createRoot(container);
+            root.render(React.createElement(window.StatusUpdate));
+            
+            console.log('React component mounted successfully');
+        } catch (error) {
+            console.error('Error mounting Status Update Dashboard:', error);
+            document.getElementById('status-update-root').innerHTML = `
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Error!</strong>
+                    <span class="block sm:inline"> Failed to load dashboard: ${error.message}</span>
+                </div>
+            `;
+        }
+    });
+</script>
+{% endblock %}
